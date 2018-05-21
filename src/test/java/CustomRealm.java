@@ -4,8 +4,10 @@ import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.util.ByteSource;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,9 +19,12 @@ import java.util.Set;
  * @date 2018/5/20 14:58
  */
 public class CustomRealm extends AuthorizingRealm {
+    // Map模拟数据库
     Map<String, String> userMap = new HashMap<String, String>(16);
     {
-        userMap.put("Leon", "1001");
+        //给密码使用MD5加密，且加盐
+        userMap.put("Leon",new Md5Hash("1001","Leon").toString());
+        // userMap.put("Leon", "1001");
         // 设置Reaml Name
         super.setName("CustomRealm");
     }
@@ -69,6 +74,8 @@ public class CustomRealm extends AuthorizingRealm {
             return null;
         }
         SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(userName, password, "CustomRealm");
+        //给传入的password先加上盐
+        simpleAuthenticationInfo.setCredentialsSalt(ByteSource.Util.bytes("Leon"));
         return simpleAuthenticationInfo;
     }
 
